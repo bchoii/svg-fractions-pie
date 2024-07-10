@@ -1,22 +1,22 @@
 import { useState } from "react";
 import "./App.css";
+import { Pie } from "./Pie";
+import { Fraction } from "./Fraction";
 
 const range = (size: number): number[] => Array.from(Array(size).keys());
 
 function App() {
   const [numerator, setNumerator] = useState(2);
   const [denominator, setDenominator] = useState(10);
-  const angle = (360 * numerator) / denominator;
-
-  const cos = (angle: number) => Math.cos((angle / 180) * Math.PI);
-  const sin = (angle: number) => Math.sin((angle / 180) * Math.PI);
 
   return (
     <>
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "auto 1fr",
+          gridTemplateColumns: "auto 1fr auto",
+          width: 300,
+          margin: "auto",
         }}
       >
         <div>Numerator :</div>
@@ -27,11 +27,10 @@ function App() {
           max={24}
           onChange={(e) => {
             const value = +e.target.value;
-            if (value <= denominator) {
-              setNumerator(value);
-            }
+            setNumerator(value);
           }}
         ></input>
+        {numerator}
         <div>Denominator :</div>
         <input
           type="range"
@@ -40,57 +39,24 @@ function App() {
           max={24}
           onChange={(e) => {
             const value = +e.target.value;
-            if (value >= numerator) {
-              setDenominator(value);
-            }
+            setDenominator(value);
           }}
         ></input>
+        {denominator}
       </div>
-      <div style={{ border: "1px solid #555", margin: 10 }}>
-        <svg
-          viewBox="-200 -200 400 400"
-          width="400"
-          height="400"
-          stroke="white"
-          fill="none"
-          stroke-width="2"
-        >
-          <text x="0" y="-120" stroke="none" fill="white" text-anchor="middle">
-            {numerator} / {denominator}
-          </text>
-          <circle r="100" cx="0" cy="0" stroke="#333" />
-          {range(denominator).map((n) => (
-            <line
-              x1="0"
-              y1="0"
-              x2={100 * sin((360 * n) / denominator)}
-              y2={-100 * cos((360 * n) / denominator)}
-              stroke="#333"
-            />
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <Fraction {...{ numerator, denominator }}></Fraction>
+      </div>
+      <div style={{ display: "grid" }}>
+        <div style={{ display: "flex", overflowX: "scroll" }}>
+          {numerator == 0 && <Pie numerator={0} {...{ denominator }}></Pie>}
+          {range(Math.floor(numerator / denominator)).map((x) => (
+            <Pie {...{ numerator: denominator, denominator }}></Pie>
           ))}
-          {range(numerator).map((n) => (
-            <line
-              x1="0"
-              y1="0"
-              x2={100 * sin((n * angle) / numerator)}
-              y2={-100 * cos((n * angle) / numerator)}
-            />
-          ))}
-          {numerator == denominator ? (
-            <circle r="100" cx="0" cy="0" />
-          ) : (
-            <>
-              <path
-                d={`M 0 0
-           L 0 -100
-           A 100 100 0 ${sin(angle) > 0 ? 0 : 1} 1
-            ${100 * sin(angle)} ${-100 * cos(angle)}
-           L 0 0
-           `}
-              />
-            </>
+          {numerator % denominator > 0 && (
+            <Pie {...{ numerator: numerator % denominator, denominator }}></Pie>
           )}
-        </svg>
+        </div>
       </div>
     </>
   );
